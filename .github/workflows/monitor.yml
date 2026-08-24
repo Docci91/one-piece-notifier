@@ -9,7 +9,13 @@ name: DO Display Notifier
 on:
   schedule:
     - cron: "*/5 * * * *"
-  workflow_dispatch: {}   # permet de lancer une vérification manuelle depuis l'onglet Actions
+  workflow_dispatch:   # permet de lancer une vérification manuelle depuis l'onglet Actions
+    inputs:
+      test:
+        description: "Envoyer une notification de test (sans vérifier les vrais sites)"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write   # nécessaire pour que le workflow puisse commiter state.json
@@ -33,7 +39,12 @@ jobs:
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        run: python monitor.py --once
+        run: |
+          if [ "${{ inputs.test }}" = "true" ]; then
+            python monitor.py --test
+          else
+            python monitor.py --once
+          fi
 
       - name: Sauvegarder l'état pour la prochaine vérification
         run: |
