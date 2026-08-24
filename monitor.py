@@ -46,6 +46,7 @@ CHECK_INTERVAL_SECONDS = 300      # 5 minutes, cadence normale
 HOT_CHECK_INTERVAL_SECONDS = 60   # 1 minute, cadence "sortie proche"
 HOT_MAX_ROUNDS_PER_RUN = 4        # nb de vérifications rapprochées faites en une seule exécution GitHub Actions
 RUN_ONCE = "--once" in sys.argv  # utilisé par le workflow GitHub Actions
+TEST_MODE = "--test" in sys.argv  # envoie une fausse alerte, sans vérifier les sites
 
 # Fenêtres de dates autour desquelles on veut vérifier beaucoup plus souvent
 # (sortie annoncée, période de restock probable...). Ajoute/modifie librement
@@ -247,6 +248,16 @@ def check_once(state: dict) -> None:
 
 
 if __name__ == "__main__":
+    if TEST_MODE:
+        print("Mode test : envoi d'une fausse alerte, sans vérifier les vrais sites.")
+        notify(
+            title="🚨 Test DO DISPLAY NOTIFIER",
+            message="Ceci est une notification de test. Si tu la vois (et sur Discord si configuré), le système fonctionne.",
+            url="https://github.com/",
+        )
+        print("Notification de test envoyée.")
+        sys.exit(0)
+
     state = load_state()
     hot = is_hot_period()
     print(f"Surveillance de {len(SITES)} sites.")
