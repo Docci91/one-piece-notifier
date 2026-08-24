@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DO DISPLAY NOTIFIER</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0A1622;
+    --surface: #101E2C;
+    --border: #22384E;
+    --parchment: #EDE1C6;
+    --brass: #C9A24B;
+    --muted: #8C9AAE;
+    --muted2: #6E7F93;
+    --fr: #6FA8A0;
+    --en: #C9A24B;
+    --jp: #E4572E;
+    --mixte: #8C9AAE;
+    font-family: 'Inter', sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--navy); color: var(--parchment); min-height: 100vh; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 18px 24px 60px; }
+  header.top { border-bottom: 1px solid #1E3348; padding: 26px 24px 18px; }
+  header.top .inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; gap: 16px; }
+  h1 { font-family: 'Cinzel', serif; font-weight: 700; font-size: 25px; letter-spacing: 0.06em; margin: 0; }
+  header.top p { margin: 4px 0 0; font-size: 13px; color: var(--muted); }
+  .needle { animation: spin 14s linear infinite; transform-origin: 50px 50px; }
+  @keyframes spin { 0% { transform: rotate(0deg); } 50% { transform: rotate(8deg); } 100% { transform: rotate(0deg); } }
+
+  .tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 4px; }
+  .tab { padding: 7px 12px; border-radius: 6px; font-size: 12.5px; font-family: 'IBM Plex Mono', monospace; font-weight: 600; white-space: nowrap; border: 1px solid var(--border); background: var(--surface); color: var(--muted); cursor: pointer; flex-shrink: 0; }
+  .tab.active { border-color: var(--brass); background: var(--brass); color: var(--navy); }
+
+  .ed-title { font-family: 'Cinzel', serif; font-size: 19px; margin: 10px 0 2px; }
+  .ed-sub { margin: 0; font-size: 12px; color: var(--muted2); }
+
+  .stats { display: flex; gap: 10px; flex-wrap: wrap; margin: 18px 0; }
+  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; min-width: 150px; }
+  .stat .num { font-family: 'IBM Plex Mono', monospace; font-size: 20px; color: var(--brass); font-weight: 500; }
+  .stat .lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 16px; }
+  .search-box { position: relative; flex: 1 1 220px; }
+  .search-box input { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 9px 12px 9px 30px; color: var(--parchment); font-size: 13px; font-family: inherit; }
+  .search-box::before { content: "🔍"; position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; opacity: .6; }
+
+  button, input, select, textarea { font-family: inherit; }
+  .btn-primary { display: flex; align-items: center; gap: 6px; background: var(--brass); color: var(--navy); border: none; border-radius: 6px; padding: 9px 14px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .btn-secondary { background: var(--border); color: var(--parchment); }
+
+  form.add-form { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  form.add-form input, form.add-form select { background: var(--navy); border: 1px solid var(--border); border-radius: 6px; padding: 9px 10px; color: var(--parchment); font-size: 13px; }
+  form.add-form .full { grid-column: 1 / -1; }
+  .lang-checks { display: flex; gap: 8px; align-items: center; }
+  .lang-checks label { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--muted); cursor: pointer; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 10px; position: relative; transition: border-color .15s, transform .15s; }
+  .card:hover { border-color: var(--brass); transform: translateY(-2px); }
+  .card .fav-tag { position: absolute; top: 10px; right: -2px; background: var(--brass); color: var(--navy); font-family: 'IBM Plex Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: .08em; padding: 2px 8px 2px 10px; border-radius: 3px 0 0 3px; transform: rotate(-3deg); }
+  .row-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .badges { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .badge { font-family: 'IBM Plex Mono', monospace; font-size: 10px; border-radius: 3px; padding: 2px 7px; text-transform: uppercase; border: 1px solid; }
+  .lang-badge { font-family: 'IBM Plex Mono', monospace; font-size: 9px; font-weight: 600; letter-spacing: .06em; border-radius: 3px; padding: 1px 5px; border: 1px solid; }
+  .star-btn { background: none; border: none; cursor: pointer; color: #3E5670; padding: 0; font-size: 17px; }
+  .star-btn.active { color: var(--brass); }
+  .site-name { font-family: 'Cinzel', serif; font-size: 16px; font-weight: 600; color: var(--parchment); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+  .site-desc { font-size: 12.5px; color: var(--muted); margin: 6px 0 0; line-height: 1.5; }
+  .search-link { font-size: 11.5px; color: var(--parchment); background: var(--navy); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; text-align: center; text-decoration: none; display: block; }
+  .row-bottom { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 4px; }
+  .check-btn { display: flex; align-items: center; gap: 6px; border-radius: 6px; padding: 5px 9px; font-size: 11px; cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--muted); }
+  .check-btn.done { background: #20402F; border-color: #4B8A63; color: #8FD6A6; }
+  .icon-btn { background: none; border: none; cursor: pointer; color: var(--muted2); padding: 0; font-size: 14px; }
+  .icon-btn.danger { color: #5A2E2E; }
+  textarea.notes { width: 100%; background: var(--navy); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; color: var(--parchment); font-size: 12px; resize: vertical; }
+  .ts { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #4E617A; }
+
+  .empty { border: 1px dashed var(--border); border-radius: 8px; padding: 40px 20px; text-align: center; color: var(--muted2); font-size: 13px; }
+  .footer-note { margin-top: 36px; padding-top: 18px; border-top: 1px solid #1E3348; font-size: 12px; color: var(--muted2); line-height: 1.6; }
+  ::-webkit-scrollbar { height: 6px; }
+  ::-webkit-scrollbar-thumb { background: #2A3F55; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="inner">
+    <svg width="44" height="44" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="46" fill="none" stroke="#C9A24B" stroke-width="1.5" />
+      <circle cx="50" cy="50" r="38" fill="none" stroke="#C9A24B" stroke-width="0.75" opacity="0.5" />
+      <g class="needle">
+        <polygon points="50,18 45,50 50,54 55,50" fill="#E4572E" />
+        <polygon points="50,82 45,50 50,46 55,50" fill="#EDE1C6" />
+      </g>
+      <circle cx="50" cy="50" r="3.5" fill="#C9A24B" />
+    </svg>
+    <div>
+      <h1>DO DISPLAY NOTIFIER</h1>
+      <p>Sites livrant en France, classés par édition — VF en priorité, VA en secours</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="tabs" id="tabs"></div>
+  <h2 class="ed-title" id="edTitle"></h2>
+  <p class="ed-sub" id="edSub"></p>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="controls">
+    <div class="search-box"><input id="searchInput" placeholder="Chercher un site..." /></div>
+    <button class="btn-primary" id="toggleFormBtn">+ Ajouter un site</button>
+  </div>
+
+  <form class="add-form" id="addForm" style="display:none">
+    <input id="newName" required placeholder="Nom du site" />
+    <input id="newUrl" required placeholder="URL (ex: exemple.fr/one-piece)" />
+    <select id="newCategory">
+      <option>Boutique FR</option>
+      <option>Import JP</option>
+      <option>Marketplace</option>
+      <option>Autre</option>
+    </select>
+    <div class="lang-checks">
+      <label><input type="checkbox" value="FR" class="newLang" checked> FR</label>
+      <label><input type="checkbox" value="EN" class="newLang"> EN</label>
+      <label><input type="checkbox" value="JP" class="newLang"> JP</label>
+    </div>
+    <input id="newDesc" class="full" placeholder="Description courte (optionnel)" />
+    <button type="submit" class="btn-primary full" style="justify-content:center">Ajouter au registre</button>
+  </form>
+
+  <div id="grid" class="grid"></div>
+
+  <div class="footer-note" id="footerNote"></div>
+</div>
+
+<script>
+// ---------------------------------------------------------------------------
+// DO DISPLAY NOTIFIER — version autonome (sans build, sans cloud)
+// Sauvegarde locale via localStorage : les données restent dans CE navigateur,
+// sur CET appareil. Rien n'est envoyé nulle part.
+// ---------------------------------------------------------------------------
+
+const EDITIONS = [
+  { code: "OP01", nameFr: "Aube Romantique", nameEn: "Romance Dawn", date: "déc. 2022" },
+  { code: "OP02", nameFr: "Guerre au Sommet", nameEn: "Paramount War", date: "mars 2023" },
+  { code: "OP03", nameFr: "Piliers de la Force", nameEn: "Pillars of Strength", date: "juin 2023" },
+  { code: "OP04", nameFr: "Royaumes d'Intrigue", nameEn: "Kingdoms of Intrigue", date: "sept. 2023" },
+  { code: "OP05", nameFr: "Éveil de la Nouvelle Ère", nameEn: "Awakening of the New Era", date: "déc. 2023" },
+  { code: "OP06", nameFr: "Ailes du Capitaine", nameEn: "Wings of the Captain", date: "mars 2024" },
+  { code: "OP07", nameFr: "500 ans dans le Futur", nameEn: "500 Years in the Future", date: "juin 2024" },
+  { code: "OP08", nameFr: "Deux Légendes", nameEn: "Two Legends", date: "sept. 2024" },
+  { code: "OP09", nameFr: "Les Nouveaux Empereurs", nameEn: "Emperors in the New World", date: "déc. 2024" },
+  { code: "OP10", nameFr: "Sang Royal", nameEn: "Royal Blood", date: "mars 2025" },
+  { code: "OP11", nameFr: "Un Poing de Vitesse Divine", nameEn: "A Fist of Divine Speed", date: "juin 2025" },
+  { code: "OP12", nameFr: "Héritage du Maître", nameEn: "Legacy of the Master", date: "août 2025" },
+  { code: "OP13", nameFr: "Successeurs", nameEn: "Carrying on His Will", date: "nov. 2025" },
+  { code: "OP14", nameFr: "Les Sept de la Mer d'Azur", nameEn: "The Azure Sea's Seven", date: "janv. 2026" },
+  { code: "OP15", nameFr: "Aventure sur l'Île de Kami", nameEn: "Adventure on KAMI's Island", date: "avr. 2026" },
+  { code: "OP16", nameFr: "L'Heure de la Bataille", nameEn: "The Time of Battle", date: "juin 2026" },
+  { code: "OP17", nameFr: "Les Guerriers les Plus Puissants du Monde", nameEn: "The World's Strongest Warriors", date: "~août 2026 (à confirmer)" },
+];
+
+const DEFAULT_SITES = [
+  { id: "pixelheart", name: "PixelHeart", url: "https://www.pixelheart.eu/fr/produit/one-piece-card-game-boite-de-boosters-francais-display-op17-les-plus-puissants-des-guerriers/", domain: "pixelheart.eu", category: "Boutique FR", languages: ["FR"], searchMode: "google", description: "Boutique française établie, page produit OP17 en VF confirmée, arrivage annoncé fin septembre." },
+  { id: "buy-the-game", name: "Buy the Game", url: "https://buy-the-game.fr/produit/one-piece-card-game-op17-4th-anniversary-display/", domain: "buy-the-game.fr", category: "Boutique FR", languages: ["FR"], searchMode: "google", description: "Boutique française spécialisée précommandes, display OP17 VF en ligne, limité à 1/mois." },
+  { id: "shop-omw", name: "Shop OMW", url: "https://shop.otakusmafiaworld.fr/produit/one-piece-display-24-boosters-op-17/", domain: "shop.otakusmafiaworld.fr", category: "Boutique FR", languages: ["FR"], searchMode: "google", description: "Boutique française culture pop/cartes à collectionner, display OP17 VF disponible en précommande." },
+  { id: "guizette-family", name: "Guizette Family", url: "https://www.guizettefamily.com/produit/display-one-piece-op17/", domain: "guizettefamily.com", category: "Boutique FR", languages: ["FR"], searchMode: "google", description: "Boutique française TCG, catalogue One Piece fourni, display OP17 VF en précommande." },
+  { id: "shop-t-jeux", name: "Shop T Jeux", url: "https://shoptjeux.com/produit/display-op17-les-guerriers-les-plus-puissants-au-monde-fr/", domain: "shoptjeux.com", category: "Boutique FR", languages: ["FR"], searchMode: "google", description: "Boutique française cartes à collectionner, OP17 VF avec système d'alerte retour en stock intégré." },
+  { id: "koala-games", name: "Koala Games", url: "https://www.koalagames.shop/products/precommande-%e2%9a%94%ef%b8%8f-display-one-piece-op17-les-plus-puissants-des-guerriers-fr", domain: "koalagames.shop", category: "Boutique FR", languages: ["FR"], searchMode: "shopify", description: "Boutique française, display OP17 VF en précommande (12 displays = 1 case)." },
+  { id: "carte-one-piece", name: "Carte One Piece", url: "https://onepiece-cards.com/pages/articles-en-precommandes", domain: "onepiece-cards.com", category: "Boutique FR", languages: ["FR"], searchMode: "shopify", description: "Boutique française dédiée, page précommandes mise à jour à chaque annonce. Livraison France en point relais." },
+  { id: "ludisphere", name: "Ludisphère", url: "https://ludisphere.fr/collections/one-piece-card-game-precommande", domain: "ludisphere.fr", category: "Boutique FR", languages: ["FR", "EN"], searchMode: "shopify", description: "Displays, decks et coffrets en précommande VF et EN, expédiés depuis la France." },
+  { id: "masterset", name: "Masterset", url: "https://masterset.store/collections/one-piece-tcg", domain: "masterset.store", category: "Boutique FR", languages: ["FR", "EN", "JP"], searchMode: "shopify", description: "Gros catalogue avec versions FR, EN et JP clairement distinguées, dates de sortie précises." },
+  { id: "coin-des-barons", name: "Le Coin des Barons", url: "https://lecoindesbarons.com/les-tcg/cartes-onepiece/display-one-piece/", domain: "lecoindesbarons.com", category: "Boutique FR", languages: ["FR", "EN"], searchMode: "google", description: "Displays neufs et scellés, précommandes ouvertes dès l'annonce Bandai, calendrier de sortie tenu à jour." },
+  { id: "pokezenith", name: "PokeZenith", url: "https://www.pokezenith.com/content/31-one-piece-card-game-tcg-actualites-extensions-et-calendrier-des-sorties", domain: "pokezenith.com", category: "Boutique FR", languages: ["FR", "EN"], searchMode: "google", description: "Boutique française qui suit de près la demande sur les versions FR et EN, alertes rupture de stock fréquentes." },
+  { id: "micromania", name: "Micromania", url: "https://www.micromania.fr/fanzone/liste-complete-des-extensions-et-series-speciales-du-tcg-one-piece.html", domain: "micromania.fr", category: "Boutique FR", languages: ["FR"], searchMode: "google", description: "Enseigne française bien connue, stock des displays officiels en points de vente et en ligne." },
+  { id: "hobby-max", name: "Hobby Max", url: "https://www.hobby-max.fr/2318-one-piece", domain: "hobby-max.fr", category: "Boutique FR", languages: ["FR", "EN"], searchMode: "google", description: "Boutique française généraliste jeux/cartes, rayon One Piece Card Game avec displays et boosters." },
+  { id: "maxi-reves", name: "Maxi Rêves", url: "https://maxireves.fr/selection-jeux/jeux-de-cartes-tcg/one-piece-tcg/", domain: "maxireves.fr", category: "Boutique FR", languages: ["FR", "EN"], searchMode: "google", description: "Boutique française (Abbeville), displays FR et EN, présente aussi en magasin physique." },
+  { id: "gentlemen-du-jeu", name: "Les Gentlemen du Jeu", url: "https://lesgentlemendujeu.com/150-display-one-piece", domain: "lesgentlemendujeu.com", category: "Boutique FR", languages: ["FR", "EN"], searchMode: "google", description: "Boutique française de jeux et TCG, rayon dédié aux displays One Piece." },
+  { id: "1piecetcg", name: "1PieceTCG", url: "https://1piecetcg.fr/collections/all", domain: "1piecetcg.fr", category: "Boutique FR", languages: ["FR", "EN"], searchMode: "shopify", description: "Boutique indépendante 100% dédiée au One Piece TCG, cartes FR et EN, envoi suivi depuis la France." },
+  { id: "destocktcg", name: "DestockTCG", url: "https://www.destocktcg.fr/jeux-de-cartes-a-collectionner/one-piece-card-game/", domain: "destocktcg.fr", category: "Boutique FR", languages: ["FR"], searchMode: "google", description: "Displays et boosters VF, produits scellés, expédition sous 24h en France." },
+  { id: "ecardstore", name: "ECardStore", url: "https://ecardstore.fr/", domain: "ecardstore.fr", category: "Boutique FR", languages: ["FR", "EN", "JP"], searchMode: "google", description: "Boutique multi-TCG française, propose aussi les versions japonaises des displays One Piece." },
+  { id: "cultura", name: "Cultura", url: "https://www.cultura.com/c/collections-one-piece.html", domain: "cultura.com", category: "Boutique FR", languages: ["FR"], searchMode: "google", description: "Grande enseigne française, vend cartes et coffrets One Piece en magasin et en ligne." },
+  { id: "philibert", name: "Philibert", url: "https://www.philibertnet.com/fr/15860-one-piece-card-game", domain: "philibertnet.com", category: "Boutique FR", languages: ["FR", "EN"], searchMode: "google", description: "Référence française du jeu de société et des JCC, catalogue One Piece Card Game fourni." },
+  { id: "shop-tcg", name: "Shop TCG", url: "https://shop-tcg.fr/product-category/one-piece/", domain: "shop-tcg.fr", category: "Boutique FR", languages: ["EN", "JP"], searchMode: "google", description: "Import direct du Japon et précommandes EN, basé en France." },
+  { id: "royal-tcg", name: "Royal TCG", url: "https://www.royaltcg.shop/onepiece", domain: "royaltcg.shop", category: "Boutique FR", languages: ["EN"], searchMode: "shopify", description: "Displays en version anglaise, stock garanti annoncé sur certaines références." },
+  { id: "kyushu-tcg", name: "Kyushu TCG", url: "https://kyushutcg.com/collections/precommandes-one-piece-tcg-japonais", domain: "kyushutcg.com", category: "Import JP", languages: ["JP"], searchMode: "shopify", description: "Précommandes de displays japonais, expédiées depuis la France sans frais de douane." },
+  { id: "voggt", name: "Voggt", url: "https://voggt.com/", domain: "voggt.com", category: "Marketplace", languages: ["Mixte"], searchMode: "google", description: "Marketplace entre particuliers livrant en France, utile pour les éditions plus anciennes à prix négocié." },
+  { id: "cardmarket", name: "Cardmarket", url: "https://www.cardmarket.com/", domain: "cardmarket.com", category: "Marketplace", languages: ["Mixte"], searchMode: "google", description: "Grande marketplace européenne, vendeurs multiples livrant en France, comparaison de prix facile." },
+];
+
+const LANG_COLOR = { FR: "var(--fr)", EN: "var(--en)", JP: "var(--jp)", Mixte: "var(--mixte)" };
+const LANG_RANK = { FR: 0, EN: 1, JP: 2, Mixte: 2 };
+const CAT_COLOR = { "Boutique FR": "var(--fr)", "Import JP": "var(--jp)", "Marketplace": "var(--brass)", "Autre": "var(--mixte)" };
+
+const STORAGE_KEY = "do-display-notifier:standalone:v1";
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) { /* ignore, on repart de zéro */ }
+  return { customSites: [], overrides: {}, removedDefaults: [] };
+}
+function saveData(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+let state = loadData();
+let activeEdition = "OP17";
+let searchQuery = "";
+let expandedNotesId = null;
+
+function overrideKey(editionCode, siteId) { return editionCode + "__" + siteId; }
+function todayStr() { return new Date().toISOString().slice(0, 10); }
+function esc(s) { const d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+
+function allSites() {
+  const defaults = DEFAULT_SITES.filter(s => !state.removedDefaults.includes(s.id));
+  return [...defaults, ...state.customSites];
+}
+
+function buildSearchUrl(site, edition) {
+  const query = edition.code + " display";
+  if (site.searchMode === "shopify") {
+    return "https://" + site.domain + "/search?q=" + encodeURIComponent(query);
+  }
+  return "https://www.google.com/search?q=" + encodeURIComponent("site:" + site.domain + " " + query);
+}
+
+function renderTabs() {
+  const tabs = document.getElementById("tabs");
+  tabs.innerHTML = EDITIONS.map(ed =>
+    `<span class="tab${ed.code === activeEdition ? " active" : ""}" data-code="${ed.code}">${ed.code}</span>`
+  ).join("");
+  tabs.querySelectorAll(".tab").forEach(el => {
+    el.addEventListener("click", () => { activeEdition = el.dataset.code; render(); });
+  });
+}
+
+function renderEditionHeader() {
+  const ed = EDITIONS.find(e => e.code === activeEdition);
+  document.getElementById("edTitle").textContent = ed.code + " — " + ed.nameFr;
+  document.getElementById("edSub").textContent = ed.nameEn + " · sortie " + ed.date;
+}
+
+function renderStats(sites) {
+  const today = todayStr();
+  let favoris = 0, verifies = 0;
+  sites.forEach(s => {
+    const key = overrideKey(activeEdition, s.id);
+    const ov = state.overrides[key];
+    if (ov && ov.favorite) favoris++;
+    if (ov && ov.lastChecked === today) verifies++;
+  });
+  document.getElementById("stats").innerHTML = `
+    <div class="stat"><div class="num">${sites.length}</div><div class="lbl">Sites (France)</div></div>
+    <div class="stat"><div class="num">${favoris}</div><div class="lbl">Favoris pour cette édition</div></div>
+    <div class="stat"><div class="num">${verifies}</div><div class="lbl">Vérifiés aujourd'hui</div></div>
+  `;
+}
+
+function renderGrid() {
+  const ed = EDITIONS.find(e => e.code === activeEdition);
+  const today = todayStr();
+  let sites = allSites();
+
+  if (searchQuery.trim()) {
+    const q = searchQuery.trim().toLowerCase();
+    sites = sites.filter(s => s.name.toLowerCase().includes(q) || s.description.toLowerCase().includes(q));
+  }
+
+  sites = sites.map(s => {
+    const key = overrideKey(activeEdition, s.id);
+    const ov = state.overrides[key] || {};
+    return { ...s, favorite: !!ov.favorite, checked: !!ov.checked, lastChecked: ov.lastChecked || null, notes: ov.notes || "", bestLangRank: Math.min(...s.languages.map(l => LANG_RANK[l] ?? 3)) };
+  });
+
+  sites.sort((a, b) => {
+    if (b.favorite !== a.favorite) return b.favorite ? 1 : -1;
+    if (a.bestLangRank !== b.bestLangRank) return a.bestLangRank - b.bestLangRank;
+    return a.name.localeCompare(b.name);
+  });
+
+  renderStats(sites);
+
+  const grid = document.getElementById("grid");
+  if (sites.length === 0) {
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1">Aucun site ne correspond à ta recherche. Ajoute-en un nouveau avec le bouton ci-dessus.</div>`;
+    return;
+  }
+
+  grid.innerHTML = sites.map(site => {
+    const checkedToday = site.lastChecked === today && site.checked;
+    const catColor = CAT_COLOR[site.category] || "var(--mixte)";
+    const searchUrl = buildSearchUrl(site, ed);
+    const langBadges = site.languages.map(l => `<span class="lang-badge" style="color:${LANG_COLOR[l]};border-color:${LANG_COLOR[l]}">${l}</span>`).join("");
+    const expanded = expandedNotesId === site.id;
+
+    return `
+      <div class="card">
+        ${site.favorite ? '<div class="fav-tag">SUIVI</div>' : ''}
+        <div class="row-top">
+          <div class="badges">
+            <span class="badge" style="color:${catColor};border-color:${catColor}">${esc(site.category)}</span>
+            ${langBadges}
+          </div>
+          <button class="star-btn${site.favorite ? ' active' : ''}" data-action="fav" data-id="${site.id}">★</button>
+        </div>
+        <div>
+          <a class="site-name" href="${site.url}" target="_blank" rel="noopener noreferrer">${esc(site.name)} ↗</a>
+          <p class="site-desc">${esc(site.description)}</p>
+        </div>
+        <a class="search-link" href="${searchUrl}" target="_blank" rel="noopener noreferrer">Chercher ${ed.code} sur ce site</a>
+        <div class="row-bottom">
+          <button class="check-btn${checkedToday ? ' done' : ''}" data-action="check" data-id="${site.id}">✓ ${checkedToday ? "Vérifié aujourd'hui" : "Marquer vérifié"}</button>
+          <div style="display:flex;align-items:center;gap:10px">
+            ${site.lastChecked ? `<span class="ts">${site.lastChecked}</span>` : ""}
+            <button class="icon-btn" data-action="toggle-notes" data-id="${site.id}">${expanded ? "▲" : "▼"}</button>
+            <button class="icon-btn danger" data-action="remove" data-id="${site.id}" data-default="${site.isDefault ? "" : (DEFAULT_SITES.some(d => d.id === site.id) ? "1" : "")}">🗑</button>
+          </div>
+        </div>
+        ${expanded ? `<textarea class="notes" data-action="notes" data-id="${site.id}" rows="3" placeholder="Notes sur ${ed.code} (prix vu, date confirmée, code promo...)">${esc(site.notes)}</textarea>` : ""}
+      </div>
+    `;
+  }).join("");
+
+  grid.querySelectorAll('[data-action="fav"]').forEach(btn => btn.addEventListener("click", () => toggleFavorite(btn.dataset.id)));
+  grid.querySelectorAll('[data-action="check"]').forEach(btn => btn.addEventListener("click", () => toggleChecked(btn.dataset.id)));
+  grid.querySelectorAll('[data-action="toggle-notes"]').forEach(btn => btn.addEventListener("click", () => { expandedNotesId = expandedNotesId === btn.dataset.id ? null : btn.dataset.id; render(); }));
+  grid.querySelectorAll('[data-action="remove"]').forEach(btn => btn.addEventListener("click", () => removeSite(btn.dataset.id)));
+  grid.querySelectorAll('[data-action="notes"]').forEach(ta => ta.addEventListener("change", () => updateNotes(ta.dataset.id, ta.value)));
+}
+
+function updateOverride(siteId, patch) {
+  const key = overrideKey(activeEdition, siteId);
+  state.overrides[key] = { ...(state.overrides[key] || {}), ...patch };
+  saveData(state);
+}
+function toggleFavorite(siteId) {
+  const key = overrideKey(activeEdition, siteId);
+  const cur = state.overrides[key] || {};
+  updateOverride(siteId, { favorite: !cur.favorite });
+  render();
+}
+function toggleChecked(siteId) {
+  const key = overrideKey(activeEdition, siteId);
+  const cur = state.overrides[key] || {};
+  const today = todayStr();
+  updateOverride(siteId, { checked: !cur.checked, lastChecked: !cur.checked ? today : (cur.lastChecked || null) });
+  render();
+}
+function updateNotes(siteId, text) {
+  updateOverride(siteId, { notes: text });
+}
+function removeSite(siteId) {
+  const isDefault = DEFAULT_SITES.some(d => d.id === siteId);
+  if (isDefault) {
+    state.removedDefaults.push(siteId);
+  } else {
+    state.customSites = state.customSites.filter(s => s.id !== siteId);
+  }
+  saveData(state);
+  render();
+}
+
+document.getElementById("toggleFormBtn").addEventListener("click", () => {
+  const form = document.getElementById("addForm");
+  form.style.display = form.style.display === "none" ? "grid" : "none";
+});
+
+document.getElementById("addForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const name = document.getElementById("newName").value.trim();
+  let url = document.getElementById("newUrl").value.trim();
+  const category = document.getElementById("newCategory").value;
+  const description = document.getElementById("newDesc").value.trim();
+  const languages = Array.from(document.querySelectorAll(".newLang:checked")).map(el => el.value);
+  if (!name || !url) return;
+  if (!/^https?:\/\//i.test(url)) url = "https://" + url;
+  let domain = url;
+  try { domain = new URL(url).hostname.replace(/^www\./, ""); } catch (e) {}
+  state.customSites.push({
+    id: "custom-" + Date.now(),
+    name, url, domain, category,
+    languages: languages.length ? languages : ["FR"],
+    searchMode: "google",
+    description: description || "Site ajouté manuellement, à vérifier pour la livraison France.",
+  });
+  saveData(state);
+  document.getElementById("addForm").reset();
+  document.getElementById("addForm").style.display = "none";
+  render();
+});
+
+document.getElementById("searchInput").addEventListener("input", (e) => {
+  searchQuery = e.target.value;
+  renderGrid();
+});
+
+function renderFooter() {
+  const ed = EDITIONS.find(e => e.code === activeEdition);
+  document.getElementById("footerNote").textContent =
+    "Registre construit sur des sites qui livrent en France ; les sites vendant en VF ou VF+EN passent en tête, " +
+    "l'anglais seul reste en secours. Le bouton \"Chercher " + ed.code + "\" ouvre soit la recherche interne du site, " +
+    "soit une recherche Google ciblée dessus. Données sauvegardées uniquement dans ce navigateur (localStorage), rien n'est envoyé ailleurs.";
+}
+
+function render() {
+  renderTabs();
+  renderEditionHeader();
+  renderGrid();
+  renderFooter();
+}
+
+render();
+</script>
+</body>
+</html>
