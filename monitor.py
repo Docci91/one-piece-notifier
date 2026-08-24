@@ -100,6 +100,9 @@ SITES = [
     {"name": "Guizette Family", "url": "https://www.guizettefamily.com/produit/display-one-piece-op17/"},
     {"name": "Shop T Jeux", "url": "https://shoptjeux.com/produit/display-op17-les-guerriers-les-plus-puissants-au-monde-fr/"},
     {"name": "Koala Games", "url": "https://www.koalagames.shop/products/precommande-%e2%9a%94%ef%b8%8f-display-one-piece-op17-les-plus-puissants-des-guerriers-fr"},
+    {"name": "L'Antre de Po", "url": "https://lantredepo.com/one-piece-card-game-op-17-display-de-24-boosters-fr/"},
+    {"name": "Oupi", "url": "https://oupi.eu/fr/display-one-piece/7367-display-op-17-boite-de-booster-francais-one-piece-card-game.html"},
+    {"name": "Givet Jouer", "url": "https://www.givet-jouer.com/blog/cartes-a-collectionner-5/one-piece-op-17-les-guerriers-les-plus-puissants-du-monde-les-precommandes-sont-ouvertes-147"},
 ]
 
 HEADERS = {
