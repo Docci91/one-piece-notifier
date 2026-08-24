@@ -1,0 +1,44 @@
+# Fichier à placer dans ton repo à : .github/workflows/monitor.yml
+#
+# Ce workflow relance monitor.py --once toutes les 5 minutes sur les serveurs
+# de GitHub. state.json (la mémoire des pages déjà vues) est réenregistré dans
+# le repo après chaque passage pour que la prochaine exécution s'en souvienne.
+
+name: DO Display Notifier
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch: {}   # permet de lancer une vérification manuelle depuis l'onglet Actions
+
+permissions:
+  contents: write   # nécessaire pour que le workflow puisse commiter state.json
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le repo
+        uses: actions/checkout@v4
+
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Installer les dépendances
+        run: pip install requests beautifulsoup4
+
+      - name: Vérifier les sites
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: python monitor.py --once
+
+      - name: Sauvegarder l'état pour la prochaine vérification
+        run: |
+          git config user.name "do-display-notifier-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add state.json
+          git diff --cached --quiet || git commit -m "update state [skip ci]"
+          git push
