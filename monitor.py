@@ -103,7 +103,6 @@ SITES = [
     {"name": "L'Antre de Po", "url": "https://lantredepo.com/one-piece-card-game-op-17-display-de-24-boosters-fr/"},
     {"name": "Oupi", "url": "https://oupi.eu/fr/382-one-piece?q=Cat%C3%A9gories-Display+One+Piece"},
     {"name": "Givet Jouer", "url": "https://www.givet-jouer.com/shop/op17boen-one-piece-op17-the-world-s-strongest-warriors-display-en-24-boosters-7804"},
-    {"name": "Micromania", "url": "https://www.micromania.fr/c/cartes-one-piece"},
 ]
 
 HEADERS = {
