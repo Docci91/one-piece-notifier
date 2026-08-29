@@ -78,6 +78,10 @@ def is_hot_period() -> bool:
 
 # Pages à surveiller. Sur chacune, on regarde si le texte visible change.
 SITES = [
+    {"name": "EspritJeu", "url": "https://www.espritjeu.com/one-piece-display-de-24-boosters-op17-les-guerriers-les-plus-puissants-du-monde.html"},
+    {"name": "UltraJeux", "url": "https://www.ultrajeux.com/produit-32958-boite-de-boosters-francais-one-piece-card-game-display-op17-les-guerriers-les-plus-puissants-au-monde-4582770058710.html"},
+    {"name": "As2pik", "url": "https://www.as2pik.com/boutique-en-ligne/one-piece-op17-les-guerriers-les-plus-puissants-du-monde-display-fr/"},
+    {"name": "Fantasy Sphere", "url": "https://en.fantasysphere.net/product/boite-de-24-boosters-op17-one-piece-cg-op-17-fr-10042440"},
     {"name": "Carte One Piece", "url": "https://onepiece-cards.com/pages/articles-en-precommandes"},
     {"name": "Ludisphère", "url": "https://ludisphere.fr/collections/one-piece-card-game-precommande"},
     {"name": "Masterset", "url": "https://masterset.store/collections/one-piece-tcg?filter.p.m.custom.langue=FR"},
