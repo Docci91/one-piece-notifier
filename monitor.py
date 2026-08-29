@@ -78,6 +78,7 @@ def is_hot_period() -> bool:
 
 # Pages à surveiller. Sur chacune, on regarde si le texte visible change.
 SITES = [
+    {"name": "Fnac", "url": "https://www.fnac.com/SearchResult/ResultList.aspx?Search=one+piece+op+17&SCat=0%211&sft=1&sa=1"},
     {"name": "EspritJeu", "url": "https://www.espritjeu.com/one-piece-display-de-24-boosters-op17-les-guerriers-les-plus-puissants-du-monde.html"},
     {"name": "UltraJeux", "url": "https://www.ultrajeux.com/produit-32958-boite-de-boosters-francais-one-piece-card-game-display-op17-les-guerriers-les-plus-puissants-au-monde-4582770058710.html"},
     {"name": "As2pik", "url": "https://www.as2pik.com/boutique-en-ligne/one-piece-op17-les-guerriers-les-plus-puissants-du-monde-display-fr/"},
