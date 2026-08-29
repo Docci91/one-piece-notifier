@@ -285,7 +285,7 @@
     }
   },
   "Shop OMW": {
-    "hash": "0e272e94d001e68c082281a93998a2c81cfb592890e16f0501e236939e14143c",
+    "hash": "c605593682f0ecba4eea56514416c7df924c3a935ae1584bb6b5975736706027",
     "keywords": {
       "ajouter au panier": null,
       "add to cart": null,
@@ -323,11 +323,11 @@
     }
   },
   "Shop T Jeux": {
-    "hash": "6c18b0ba522cae02a82172f97805f7b26fc66390ffdfa806d05173c523837af0",
+    "hash": "61d8354ecda6ac18720435ee1b1f407da0879509458361947bf894615654cb85",
     "keywords": {
       "ajouter au panier": null,
       "add to cart": null,
-      "en stock": null,
+      "en stock": "es produits Ajouter à ma liste KURO OP03-021 CCC10 130,00 € En stock Ajouter à ma liste BUGGY OP03-008 CCC10 180,00 € En stock A",
       "in stock": null,
       "précommander": null,
       "pré-commander": null,
