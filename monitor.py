@@ -26,6 +26,7 @@ import os
 import sys
 import time
 from datetime import datetime, timedelta
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from bs4 import BeautifulSoup
 
 # ---------------------------------------------------------------------------
@@ -43,8 +44,8 @@ NTFY_TOPIC = os.environ.get("NTFY_TOPIC", "do-display-notifier-CHANGE-MOI-1234")
 DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "")
 STATE_FILE = "state.json"
 CHECK_INTERVAL_SECONDS = 300      # 5 minutes, cadence normale
-HOT_CHECK_INTERVAL_SECONDS = 60   # 1 minute, cadence "sortie proche"
-HOT_MAX_ROUNDS_PER_RUN = 4        # nb de vérifications rapprochées faites en une seule exécution GitHub Actions
+HOT_CHECK_INTERVAL_SECONDS = 20   # cadence resserrée pendant une sortie proche
+HOT_MAX_ROUNDS_PER_RUN = 8        # nb de vérifications rapprochées faites en une seule exécution GitHub Actions
 RUN_ONCE = "--once" in sys.argv  # utilisé par le workflow GitHub Actions
 TEST_MODE = "--test" in sys.argv  # envoie une fausse alerte, sans vérifier les sites
 
@@ -132,7 +133,7 @@ STOCK_KEYWORDS = [
 
 def fetch_signature(url: str) -> str:
     """Récupère le texte visible d'une page (sans scripts/styles/menus)."""
-    r = requests.get(url, headers=HEADERS, timeout=15)
+    r = requests.get(url, headers=HEADERS, timeout=10)
     r.raise_for_status()
     soup = BeautifulSoup(r.text, "html.parser")
     for tag in soup(["script", "style", "noscript", "header", "footer", "nav"]):
@@ -200,12 +201,34 @@ def notify(title: str, message: str, url: str) -> None:
             print(f"  (notification Discord échouée : {e})")
 
 
+def _fetch_one(site: dict):
+    """Récupère une page pour un site donné, utilisé en parallèle."""
+    try:
+        text = fetch_signature(site["url"])
+        return site, text, None
+    except Exception as e:
+        return site, None, e
+
+
 def check_once(state: dict) -> None:
-    for site in SITES:
-        try:
-            text = fetch_signature(site["url"])
-        except Exception as e:
-            print(f"[{datetime.now():%H:%M:%S}] Erreur en visitant {site['name']} : {e}")
+    # Toutes les pages sont chargées en parallèle (au lieu d'une par une) :
+    # ça divise le temps total par le nombre de sites vérifiés en même temps,
+    # ce qui laisse plus de place pour resserrer la cadence pendant les
+    # périodes chaudes sans dépasser la fenêtre de 5 minutes entre deux
+    # déclenchements GitHub Actions.
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        futures = [executor.submit(_fetch_one, site) for site in SITES]
+        results = []
+        for future in as_completed(futures):
+            results.append(future.result())
+
+    # On garde l'ordre d'origine des sites pour des logs stables et lisibles.
+    order = {site["name"]: i for i, site in enumerate(SITES)}
+    results.sort(key=lambda r: order.get(r[0]["name"], 0))
+
+    for site, text, error in results:
+        if error is not None:
+            print(f"[{datetime.now():%H:%M:%S}] Erreur en visitant {site['name']} : {error}")
             continue
 
         digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
